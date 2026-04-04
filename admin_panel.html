@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Stream Asian</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ===== NAVBAR ===== -->
+    <nav id="navbar">
+      <div class="nav-logo">STREAMASIAN ADMIN</div>
+      <div class="nav-links">
+        <button class="nav-link active" onclick="filterCat('all', this)">
+          Home
+        </button>
+        <button class="nav-link" onclick="filterCat('lectures', this)">
+          Lectures
+        </button>
+        <button class="nav-link" onclick="filterCat('workshops', this)">
+          Workshops
+        </button>
+        <button class="nav-link" onclick="filterCat('events', this)">
+          Events
+        </button>
+        <button class="nav-link" onclick="filterCat('movies', this)">
+          Movies
+        </button>
+      </div>
+      <div class="nav-right">
+        <input
+          type="text"
+          id="searchBar"
+          placeholder="🔍  Search videos..."
+          oninput="doSearch()"
+        />
+        <button class="login-btn" id="logout-btn" onclick="logoutAdmin()">LOGOUT</button>
+      </div>
+    </nav>
+
+    <!-- ===== HERO BANNER ===== -->
+    <div id="heroBanner">
+      <video id="heroVideo" autoplay muted loop playsinline></video>
+      <div id="heroBg"></div>
+      <div id="heroContent">
+        <div class="hero-badge">🛠 Admin Features</div>
+        <div id="heroTitle">Admin Dashboard</div>
+        <div id="heroDesc">
+          You can view all the videos uploaded to the platform here. You have the authority to delete videos if they violate terms.
+        </div>
+      </div>
+    </div>
+
+    <!-- Video grid -->
+    <div class="row-header">
+      <div class="row-title" id="sectionTitle">All Videos</div>
+      <div class="row-count" id="sectionCount"></div>
+    </div>
+    <div class="video-grid" id="videoGrid"></div>
+
+    <script type="module" src="admin_app.js"></script>
+  </body>
+</html>

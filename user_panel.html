@@ -649,6 +649,7 @@ body {
       <!-- VIDEOS -->
       <div class="section" id="section-videos">
         <div class="section-title">Uploaded Videos</div>
+        <div id="video-alerts" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; margin-top: 5px;"></div>
         <div class="video-grid" id="video-grid"></div>
       </div>
 
@@ -785,7 +786,7 @@ body {
 
 <script type="module">
 import { db } from "./firebase.js";
-import { collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 function requireAuth() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -809,13 +810,7 @@ const videos = [
   { title:"Responsive layouts",      views:"2.6k views",duration:"9:48",  color:"#fbeaf0" },
 ];
 
-const notifications = [
-  { id:1, title:"New Video: CSS Grid Mastery 2024", uploader:"@devcraft", time:"2 min ago",  color:"#eeedfe", emoji:"🎬", unread:true },
-  { id:2, title:"New Video: React Hooks Explained", uploader:"@codewithme", time:"14 min ago", color:"#e1f5ee", emoji:"⚛️",  unread:true },
-  { id:3, title:"New Video: Figma Auto Layout Tips",uploader:"@uxstudio",  time:"1 hr ago",   color:"#e6f1fb", emoji:"🖌️", unread:true },
-  { id:4, title:"New Video: Dark Mode Best Practices",uploader:"@themedrop",time:"3 hrs ago", color:"#faeeda", emoji:"🌙", unread:false },
-  { id:5, title:"New Video: Web Performance 101",   uploader:"@speedlab",  time:"Yesterday",  color:"#fbeaf0", emoji:"⚡", unread:false },
-];
+let notifications = [];
 
 /* ═══════════════════════════════
    INIT
@@ -856,19 +851,68 @@ window.initVideos = initVideos;
 
 
 
-function initNotifications() {
+async function loadNotifications() {
+  if (!currentUser) return;
+  try {
+    const q = query(collection(db, "notifications"), where("userId", "==", currentUser.id));
+    const querySnapshot = await getDocs(q);
+    notifications = [];
+    querySnapshot.forEach((docSnap) => {
+      notifications.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    
+    // Sort descending by createdAt
+    notifications.sort((a, b) => {
+        const timeA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+        const timeB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+        return timeB - timeA;
+    });
+
+    renderNotifications();
+  } catch (err) {
+    console.error("Failed to fetch notifications:", err);
+  }
+}
+
+function renderNotifications() {
   const list = document.getElementById("notifList");
-  list.innerHTML = notifications.map(n=>`
-    <div class="notif-item ${n.unread?'unread':''}" id="notif-${n.id}" onclick="readNotif(${n.id})">
-      <div class="notif-vid-thumb" style="background:${n.color}">${n.emoji}</div>
+  const alertsContainer = document.getElementById("video-alerts");
+
+  const notifsHtml = notifications.map(n=>`
+    <div class="notif-item ${n.unread?'unread':''}" id="notif-${n.id}" onclick="readNotif('${n.id}')">
+      <div class="notif-vid-thumb" style="background:#fbeaf0">⚠️</div>
       <div class="notif-item-body">
-        <div class="notif-item-title">${n.title}</div>
-        <div class="notif-item-meta">${n.uploader} · ${n.time}</div>
+        <div class="notif-item-title">Video Removed by Admin</div>
+        <div class="notif-item-meta" style="white-space:normal;line-height:1.4;">${n.message}</div>
       </div>
       ${n.unread?'<div class="notif-dot"></div>':''}
     </div>`).join("");
+    
+  list.innerHTML = notifsHtml;
+
+  if (alertsContainer) {
+    alertsContainer.innerHTML = notifications.map(n=>`
+      <div style="background:var(--surface2); border:1px solid var(--border); border-left: 4px solid #d32f2f; padding:12px 16px; border-radius:8px; display:flex; gap:12px; align-items:center;">
+        <div style="font-size:24px;">⚠️</div>
+        <div>
+          <div style="font-weight:600; color:#d32f2f; font-size:14px; margin-bottom:4px;">Video Removed by Admin</div>
+          <div style="color:var(--txt2); font-size:13px; line-height: 1.5;">${n.message}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+    
+  if (notifications.length === 0) {
+      list.innerHTML = `<div style="padding:14px;color:var(--txt3);font-size:13px;text-align:center;">No notifications</div>`;
+  }
   updateBadge();
 }
+
+// Map the old toggle to actually just open the dropdown.
+window.toggleNotifDropdown = function() {
+  document.getElementById("notifDropdown").classList.toggle("open");
+}
+
 
 function updateBadge() {
   const count = notifications.filter(n=>n.unread).length;
@@ -876,14 +920,20 @@ function updateBadge() {
   badge.style.display = count > 0 ? "block" : "none";
 }
 
-function readNotif(id) {
+async function readNotif(id) {
   const n = notifications.find(x=>x.id===id);
-  if(n) { n.unread=false; initNotifications(); }
+  if(n && n.unread) { 
+      n.unread=false; 
+      renderNotifications();
+      try {
+          await updateDoc(doc(db, "notifications", id), { read: false }); // keep simple for now or mark true in DB
+      } catch(e) {}
+  }
 }
 
-function markAllRead() {
+async function markAllRead() {
   notifications.forEach(n=>n.unread=false);
-  initNotifications();
+  renderNotifications();
 }
 
 function toggleNotifDropdown() {
@@ -1190,8 +1240,8 @@ window.handleLogout = function() {
     window.location.href = "login_page.html";
   }
 }
-window.toggleNotifDropdown = function() {}
-window.markAllRead = function() {}
+window.markAllRead = markAllRead;
+window.readNotif = readNotif;
 window.toggle2FA = function() {}
 window.sendOTP = function() {}
 window.verifyOTP = function() {}
@@ -1253,6 +1303,7 @@ window.initUserData = function() {
 document.addEventListener("DOMContentLoaded", () => {
     window.initUserData();
     window.initVideos();
+    loadNotifications();
 });
 </script>
 </body>
