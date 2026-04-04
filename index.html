@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stream Asian</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ===== NAVBAR ===== -->
+    <nav id="navbar">
+      <div class="nav-logo">STREAMASIAN</div>
+      <div class="nav-links">
+        <button class="nav-link active" onclick="filterCat('all', this)">
+          Home
+        </button>
+        <button class="nav-link" onclick="filterCat('lectures', this)">
+          Lectures
+        </button>
+        <button class="nav-link" onclick="filterCat('workshops', this)">
+          Workshops
+        </button>
+        <button class="nav-link" onclick="filterCat('events', this)">
+          Events
+        </button>
+        <button class="nav-link" onclick="filterCat('movies', this)">
+          Movies
+        </button>
+      </div>
+      <div class="nav-right">
+        <input
+          type="text"
+          id="searchBar"
+          placeholder="🔍  Search videos..."
+          oninput="doSearch()"
+        />
+        <button class="upload-btn" onclick="openUpload()">
+          <span>+</span> Add Video
+        </button>
+        <button class="login-btn" id="login-btn" onclick="checkLogin()">LOGIN</button>
+      </div>
+    </nav>
+
+    <!-- ===== HERO BANNER ===== -->
+    <div id="heroBanner">
+      <video id="heroVideo" autoplay muted loop playsinline></video>
+      <div id="heroBg"></div>
+      <div id="heroContent">
+        <div class="hero-badge">🔴 Featured</div>
+        <div id="heroTitle">Welcome to StreamAsian</div>
+        <div id="heroDesc">
+          Your personal college video library. Model lectures, workshops, events
+          and watch them anytime — all stored locally on your device.
+        </div>
+        <button class="btn-info" onclick="openUpload()">+ Upload Video</button>
+      </div>
+    </div>
+
+    <!-- Video grid -->
+    <div class="row-header">
+      <div class="row-title" id="sectionTitle">All Videos</div>
+      <div class="row-count" id="sectionCount"></div>
+    </div>
+    <div class="video-grid" id="videoGrid"></div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
