@@ -5,7 +5,9 @@ import {
   addDoc,
   getDocs,
   doc,
-  deleteDoc
+  deleteDoc,
+  updateDoc,
+  arrayRemove
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const videos = [];
@@ -120,10 +122,11 @@ function renderAll() {
   document.getElementById("sectionCount").innerText =
     filteredVideos.length + " videos";
 
-  filteredVideos.forEach((video) => {
+  filteredVideos.forEach((video, index) => {
     const div = document.createElement("div");
     div.className = "card";
     div.style.minHeight = "300px";
+    div.style.animationDelay = `${index * 0.05}s`;
 
     const uploaderInfo = usersDict[video.uploaderId] || { name: "Unknown", email: "Unknown" };
 
@@ -180,6 +183,18 @@ window.deleteVideo = async function (id, uploaderId, videoTitle, event) {
             message: `Video "${videoTitle}" was taken down by admin. Reason: ${reason}`,
             createdAt: new Date(),
             read: false
+        });
+    }
+
+    // New: Remove from uploader's document in Firestore
+    const videoToDelete = videos.find(v => v.id === id);
+    if (uploaderId && uploaderId !== "null" && uploaderId !== "undefined" && videoToDelete) {
+        const userRef = doc(db, "users", uploaderId);
+        await updateDoc(userRef, {
+            uploadedVideos: arrayRemove({
+                videoId: id,
+                url: videoToDelete.url
+            })
         });
     }
 

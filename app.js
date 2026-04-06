@@ -6,7 +6,9 @@ import {
   getDocs,
   doc,
   deleteDoc,
-  updateDoc
+  updateDoc,
+  arrayUnion,
+  arrayRemove
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const videos = [];
@@ -131,9 +133,10 @@ function renderAll() {
 
   const isAdmin = user && user.role === 'admin';
 
-  filteredVideos.forEach((video) => {
+  filteredVideos.forEach((video, index) => {
     const div = document.createElement("div");
     div.className = "card";
+    div.style.animationDelay = `${index * 0.05}s`;
 
     div.innerHTML = `
             <div class="card-image">
@@ -334,6 +337,16 @@ async function saveVideo() {
     videoData.id = docRef.id;
     videos.push(videoData);
 
+    if (user && user.id) {
+      const userRef = doc(db, "users", user.id);
+      await updateDoc(userRef, {
+        uploadedVideos: arrayUnion({
+          videoId: docRef.id,
+          url: url
+        })
+      });
+    }
+
     closeUpload();
     renderAll();
     alert("Video has been successfully uploaded and saved!");
@@ -395,6 +408,17 @@ window.deleteVideo = async function (id, event) {
   if (!confirm("Are you sure you want to delete this video?")) return;
 
   try {
+    const videoToDelete = videos.find(v => v.id === id);
+    if (videoToDelete && videoToDelete.uploaderId) {
+      const userRef = doc(db, "users", videoToDelete.uploaderId);
+      await updateDoc(userRef, {
+        uploadedVideos: arrayRemove({
+          videoId: id,
+          url: videoToDelete.url
+        })
+      });
+    }
+
     await deleteDoc(doc(db, "videos", id));
     // remove from local array
     const idx = videos.findIndex(v => v.id === id);
