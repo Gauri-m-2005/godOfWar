@@ -1,126 +1,226 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Video Player</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Player</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
 
-<style>
-    body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: #0f0f0f;
-    color: #fff;
-}
+    <style>
+      body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: #0f0f0f;
+        color: #fff;
+      }
+      nav {
+        padding: 15px;
+        height: 50px;
+      }
+      /* From Uiverse.io by xopc333 */
+      .button {
+        display: block;
+        position: relative;
+        width: 56px;
+        height: 56px;
+        margin: 0;
+        overflow: hidden;
+        outline: none;
+        background-color: transparent;
+        cursor: pointer;
+        border: 0;
+      }
 
-.container {
-    display: flex;
-    height: 100vh;
-}
+      .button:before,
+      .button:after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        inset: 7px;
+      }
 
-/* LEFT SIDE - PLAYER */
-.player-section {
-    width: 60%;
-    padding: 20px;
-}
+      .button:before {
+        border: 4px solid #f0eeef;
+        transition:
+          opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
+          transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
+      }
 
-.video-player {
-    width: 100%;
-    height: 60vh;
-    border-radius: 12px;
-    background: black;
-}
+      .button:after {
+        border: 4px solid #96daf0;
+        transform: scale(1.3);
+        transition:
+          opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+          transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        opacity: 0;
+      }
 
-.video-details {
-    margin-top: 15px;
-}
+      .button:hover:before,
+      .button:focus:before {
+        opacity: 0;
+        transform: scale(0.7);
+        transition:
+          opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+          transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
 
-.video-title {
-    font-size: 22px;
-    font-weight: 600;
-}
+      .button:hover:after,
+      .button:focus:after {
+        opacity: 1;
+        transform: scale(1);
+        transition:
+          opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
+          transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
+      }
 
-.subject {
-    margin-top: 8px;
-    font-size: 14px;
-    color: #ccc;
-}
+      .button-box {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
 
-.description {
-    margin-top: 10px;
-    line-height: 1.5;
-    font-size: 14px;
-    color: #ddd;
-}
+      .button-elem {
+        display: block;
+        width: 20px;
+        height: 20px;
+        margin: 17px 18px 0 18px;
+        transform: rotate(180deg);
+        fill: #f0eeef;
+      }
 
-/* RIGHT SIDE - VIDEO LIST */
-.sidebar {
-    width: 40%;
-    padding: 20px;
-    overflow-y: auto;
-    border-left: 1px solid #222;
-}
+      .button:hover .button-box,
+      .button:focus .button-box {
+        transition: 0.4s;
+        transform: translateX(-56px);
+      }
 
-.video-card {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 10px;
-    transition: 0.3s;
-}
+      .container {
+        display: flex;
+        height: 100vh;
+      }
 
-.video-card:hover {
-    background: #1c1c1c;
-}
+      /* LEFT SIDE - PLAYER */
+      .player-section {
+        width: 60%;
+        padding: 5px 15px 15px 20px;
+      }
 
-.video-card video {
-    width: 120px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 8px;
-}
+      .video-player {
+        width: 100%;
+        height: 60vh;
+        border-radius: 12px;
+        background: black;
+      }
 
-.video-info {
-    flex: 1;
-}
+      .video-details {
+        margin-top: 15px;
+      }
 
-.video-info h4 {
-    margin: 0;
-    font-size: 14px;
-}
+      .video-title {
+        font-size: 22px;
+        font-weight: 600;
+      }
 
-.video-info p {
-    margin: 3px 0;
-    font-size: 12px;
-    color: #aaa;
-}
+      .subject {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #ccc;
+      }
 
-</style>
-</head>
-<body>
-    
-<div class="container">
-        
-    <!-- LEFT PLAYER -->
-    <div class="player-section">
-            <video id="mainVideo" class="video-player" controls></video>
+      .description {
+        margin-top: 10px;
+        line-height: 1.5;
+        font-size: 14px;
+        color: #ddd;
+      }
+
+      /* RIGHT SIDE - VIDEO LIST */
+      .sidebar {
+        width: 40%;
+        padding: 20px;
+        overflow-y: auto;
+        border-left: 1px solid #222;
+      }
+
+      .video-card {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 10px;
+        transition: 0.3s;
+      }
+
+      .video-card:hover {
+        background: #1c1c1c;
+      }
+
+      .video-card video {
+        width: 120px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .video-info {
+        flex: 1;
+      }
+
+      .video-info h4 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .video-info p {
+        margin: 3px 0;
+        font-size: 12px;
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <!-- From Uiverse.io by xopc333 -->
+      <button class="button" onclick="redirectHome()">
+        <div class="button-box">
+          <span class="button-elem">
+            <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"
+              ></path>
+            </svg>
+          </span>
+          <span class="button-elem">
+            <svg viewBox="0 0 46 40">
+              <path
+                d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"
+              ></path>
+            </svg>
+          </span>
+        </div>
+      </button>
+    </nav>
+    <div class="container">
+      <!-- LEFT PLAYER -->
+      <div class="player-section">
+        <video id="mainVideo" class="video-player" controls></video>
 
         <div class="video-details">
-            <div class="video-title" id="title"></div>
-            <div class="subject" id="subject"></div>
-            <div class="description" id="desc"></div>
+          <div class="video-title" id="title"></div>
+          <div class="subject" id="subject"></div>
+          <div class="description" id="desc"></div>
         </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="sidebar" id="videoList"></div>
     </div>
-    
-    <!-- RIGHT SIDEBAR -->
-    <div class="sidebar" id="videoList"></div>
-    
-</div>
 
-
-<script type="module" src="player.js"></script>
-</body>
+    <script type="module" src="player.js"></script>
+  </body>
 </html>
